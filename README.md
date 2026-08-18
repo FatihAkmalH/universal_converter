@@ -4,90 +4,90 @@
 ![Status](https://img.shields.io/badge/Status-Active-brightgreen.svg)
 ![Environment](https://img.shields.io/badge/Environment-100%25%20Client--Side-orange.svg)
 
-Alat Konversi Universal yang sepenuhnya berjalan di sisi peramban (Client-Side). Aman, cepat, dan 100% gratis tanpa memerlukan server *backend*. File Anda tidak pernah diunggah ke internet, sehingga privasi Anda terjamin.
+A Universal Conversion Tool that runs entirely in the browser (Client-Side). Safe, fast, and 100% free with no backend server required. Your files are never uploaded to the internet, ensuring your privacy is guaranteed.
 
-**🔗 Akses Web Secara Langsung:** 
-*(Masukkan link hosting Anda di sini, misalnya: `https://username.github.io/universal-converter`)*
+**🔗 Direct Web Access:** 
+*(https://converteruniversal.netlify.app)*
 
 ---
 
-## 🌟 Fitur Utama
+## 🌟 Key Features
 
-Aplikasi ini bertindak layaknya "Pisau Lipat Swiss" untuk kebutuhan konversi harian Anda.
+This application acts like a "Swiss Army Knife" for your daily conversion needs.
 
-### 🖼️ Konversi Gambar (Image)
-*   **JPG / PNG ke WebP**: Kompresi canggih dengan slider pengatur kualitas.
-*   **HEIC ke JPG / PNG**: Dekode foto dari perangkat Apple (iPhone/iPad) secara instan.
-*   **SVG ke JPG / PNG**: Rasterisasi grafik vektor menjadi gambar piksel.
+### 🖼️ Image Conversion
+*   **JPG / PNG to WebP**: Advanced compression with a quality adjustment slider.
+*   **HEIC to JPG / PNG**: Instantly decode photos from Apple devices (iPhone/iPad).
+*   **SVG to JPG / PNG**: Rasterize vector graphics into pixel images.
 
-### 📊 Konversi Data (Spreadsheet)
-*   **Excel (.xlsx, .xls) ke JSON / CSV**: Ekstrak baris data menjadi *array* untuk kebutuhan API atau integrasi web.
-*   **CSV / XML ke JSON**: Parsing data format mentah menjadi objek JSON yang rapi.
+### 📊 Data Conversion (Spreadsheet)
+*   **Excel (.xlsx, .xls) to JSON / CSV**: Extract data rows into *arrays* for API needs or web integration.
+*   **CSV / XML to JSON**: Parse raw format data into neat JSON objects.
 
-### 🎬 Konversi Media (Video & Audio)
-*   **MP4 ke MP3**: Ekstrak suara (rip) dari video menjadi format audio.
-*   **MP4 ke GIF**: Buat animasi pendek dari klip video.
-*   **WAV ke MP3 / OGG**: Kompresi file audio mentah (*lossless*) ke format *lossy*.
+### 🎬 Media Conversion (Video & Audio)
+*   **MP4 to MP3**: Extract (rip) sound from videos into audio format.
+*   **MP4 to GIF**: Create short animations from video clips.
+*   **WAV to MP3 / OGG**: Compress raw audio files (*lossless*) into *lossy* formats.
 
-### ✨ Fitur Spesial
-*   **100% Client-Side**: Tidak menggunakan server backend (PHP/Node.js dll). Privasi maksimal!
-*   **Batch Processing**: Mendukung fungsi *Drag & Drop* untuk mengonversi puluhan file sekaligus.
-*   **Download All (ZIP)**: Unduh semua hasil konversi dalam satu kemasan `.zip`.
-*   **URL Fetch (CORS Proxy)**: Bisa mengonversi gambar menggunakan *direct link* internet berkat sistem Multi-Proxy Fallback.
+### ✨ Special Features
+*   **100% Client-Side**: Uses no backend server (PHP/Node.js, etc.). Maximum privacy!
+*   **Batch Processing**: Supports *Drag & Drop* functionality to convert dozens of files at once.
+*   **Download All (ZIP)**: Download all converted results in a single `.zip` package.
+*   **URL Fetch (CORS Proxy)**: Convert images using internet *direct links* thanks to a Multi-Proxy Fallback system.
 
 ---
 
 ## 🛠️ Tech Stack & Dependencies
 
-Proyek ini dibangun menggunakan **HTML5, CSS3, dan Vanilla JavaScript (ES6)** murni tanpa framework seperti React atau Vue agar lebih ringan. 
+This project is built using pure **HTML5, CSS3, and Vanilla JavaScript (ES6)** without frameworks like React or Vue to keep it lightweight. 
 
-Ditenagai oleh library WebAssembly & Web API berikut:
+Powered by the following WebAssembly & Web API libraries:
 
-| Library / Tool | Kegunaan |
+| Library / Tool | Purpose |
 | :--- | :--- |
-| **JSZip** | Menggabungkan hasil konversi ke dalam satu file `.zip`. |
-| **heic2any** | Mendekode format Apple `.heic` ke standar web canvas. |
-| **SheetJS (xlsx)** | Membaca dan mengekstrak data dari file Microsoft Excel. |
-| **PapaParse** | Melakukan *parsing* super cepat untuk file CSV. |
-| **FFmpeg.wasm** | Membawa mesin pemroses Video/Audio (FFmpeg core-st) ke dalam peramban web. |
-| **SweetAlert2** | Menyediakan jendela *pop-up/alert* yang indah dan responsif. |
+| **JSZip** | Combines conversion results into a single `.zip` file. |
+| **heic2any** | Decodes Apple's `.heic` format into standard web canvas. |
+| **SheetJS (xlsx)** | Reads and extracts data from Microsoft Excel files. |
+| **PapaParse** | Performs super-fast *parsing* for CSV files. |
+| **FFmpeg.wasm** | Brings the Video/Audio processing engine (FFmpeg core-st) into the web browser. |
+| **SweetAlert2** | Provides beautiful and responsive *pop-up/alert* windows. |
 
 ---
 
-## 🚀 Cara Menjalankan Secara Lokal (Local Development)
+## 🚀 How to Run Locally (Local Development)
 
-Karena aplikasi ini 100% Client-Side, Anda bahkan tidak memerlukan server lokal (`localhost`). 
+Since this application is 100% Client-Side, you don't even need a local server (`localhost`). 
 
-1. **Clone repositori ini:**
+1. **Clone this repository:**
    ```bash
-   git clone https://github.com/FatihAkmalH/universal_converter.git
+   git clone [https://github.com/FatihAkmalH/universal_converter.git](https://github.com/FatihAkmalH/universal_converter.git)
    ```
-2. **Buka folder proyek.**
-3. **Klik ganda (`Double-click`)** pada file `index.html` untuk membukanya di browser favorit Anda (Chrome, Edge, Firefox, Safari).
+2. **Open the project folder.**
+3. **Double-click** the `index.html` file to open it in your favorite browser (Chrome, Edge, Firefox, Safari).
 
-*Catatan: Pastikan perangkat Anda terhubung ke internet saat pertama kali dibuka karena aplikasi perlu memuat library dari CDN.*
-
----
-
-## ⚠️ Keterbatasan Sistem
-
-Mengingat pemrosesan dilakukan di RAM dan CPU perangkat (*Client-side Processing*), harap perhatikan batasan berikut:
-*   **Ukuran File Video**: Fitur MP4/Media ditujukan untuk file berukuran kecil ke menengah. Mencoba memproses film atau video HD berdurasi panjang dapat menyebabkan *browser hang* atau memakan banyak RAM (Memori).
-*   **Fitur Konversi via URL**: Bergantung pada API *CORS Proxy* publik gratisan (AllOrigins, CodeTabs). Jika semua server perantara tersebut tumbang (*down*), maka konversi via link akan gagal. Sangat disarankan mengunduh file secara manual lalu menggunakan fitur *Drag & Drop*.
+*Note: Ensure your device is connected to the internet the first time you open it because the application needs to load libraries from the CDN.*
 
 ---
 
-## 🤝 Kontribusi
+## ⚠️ System Limitations
 
-Kontribusi selalu diterima! Jika Anda ingin menambahkan mode konversi baru atau memperbaiki performa, silakan:
-1. Silahkan hubungi saya melalui email atau lainnya sebelum melakukan Fork repositori ini.
-2. Buat *branch* fitur Anda (`git checkout -b fitur-baru`).
-3. Lakukan commit perubahan Anda (`git commit -m 'Menambahkan fitur X'`).
-4. Push ke *branch* (`git push origin fitur-baru`).
-5. Buat *Pull Request*.
+Considering the processing is done on the device's RAM and CPU (*Client-side Processing*), please note the following limitations:
+*   **Video File Size**: The MP4/Media feature is intended for small to medium-sized files. Attempting to process movies or long-duration HD videos may cause the *browser to hang* or consume a lot of RAM (Memory).
+*   **Conversion via URL Feature**: Relies on free public *CORS Proxy* APIs (AllOrigins, CodeTabs). If all these intermediary servers go down, conversion via link will fail. It is highly recommended to download the file manually and then use the *Drag & Drop* feature.
 
 ---
 
-## 📝 Lisensi
+## 🤝 Contributing
 
-Proyek ini berlisensi di bawah **MIT License**. Anda bebas menggunakan, mengubah, dan mendistribusikannya untuk keperluan pribadi maupun komersial.
+Contributions are always welcome! If you want to add new conversion modes or improve performance, please:
+1. Please contact me via email or other means before forking this repository.
+2. Create your feature *branch* (`git checkout -b feature-new`).
+3. Commit your changes (`git commit -m 'Add feature X'`).
+4. Push to the *branch* (`git push origin feature-new`).
+5. Create a *Pull Request*.
+
+---
+
+## 📝 License
+
+This project is licensed under the **MIT License**. You are free to use, modify, and distribute it for both personal and commercial purposes.
