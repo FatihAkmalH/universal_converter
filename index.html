@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="assets/favicon.webp" type="image/x-icon">
+    <title>Free Universal Converter</title>
+    <!-- Library Media -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
+    <!-- Library FFmpeg.wasm (BARU) -->
+    <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
+    <!-- Library Data -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+    <div class="container">
+        
+        <!-- ================= HALAMAN UTAMA ================= -->
+        <div id="homeView">
+            <div class="header-title">
+                <h2>Ubah Format File Tanpa Ribet</h2>
+                <p>Berbagai kebutuhan konversi file, tersedia dalam satu alat yang praktis.</p>
+            </div>
+
+            <!-- BOX DISCLAIMER BARU -->
+            <div class="disclaimer-box">
+                <div class="disclaimer-icon">🛡️</div>
+                <div class="disclaimer-text">
+                    <strong>Privasi & Keamanan Terjamin!</strong>
+                    <p>Aplikasi ini 100% <b>gratis</b> 
+                        dan berjalan di sisi pengguna (Client-Side). File Anda tidak pernah diunggah ke server mana pun, sehingga keamanan data Anda terjaga sepenuhnya. 
+                        <b>Kecepatan konversi bergantung pada spesifikasi dan performa komputer yang digunakan.</b>
+                    </p>
+                </div>
+            </div>
+
+            <div class="cards-grid">
+                <!-- Gambar -->
+                <div class="card" onclick="openConverter('webp')">
+                    <div class="bg"></div><div class="blob blob-orange"></div>
+                    <div class="card-content">
+                        <div class="card-icon">🗜️</div>
+                        <h3>JPG/PNG ke WebP</h3>
+                        <p>Kompres ukuran tanpa banyak mengurangi kualitas.</p>
+                    </div>
+                </div>
+                
+                <div class="card" onclick="openConverter('heic')">
+                    <div class="bg"></div><div class="blob blob-tosca"></div>
+                    <div class="card-content">
+                        <div class="card-icon">📱</div>
+                        <h3>HEIC ke JPG/PNG</h3>
+                        <p>Ubah format foto dari iPhone untuk semua perangkat.</p>
+                    </div>
+                </div>
+
+                <div class="card" onclick="openConverter('svg')">
+                    <div class="bg"></div><div class="blob blob-mixed"></div>
+                    <div class="card-content">
+                        <div class="card-icon">🎨</div>
+                        <h3>SVG ke JPG/PNG</h3>
+                        <p>Ubah format vektor menjadi gambar raster biasa.</p>
+                    </div>
+                </div>
+
+                <!-- Data -->
+                <div class="card" onclick="openConverter('excel')">
+                    <div class="bg"></div><div class="blob blob-blue"></div>
+                    <div class="card-content">
+                        <div class="card-icon">📊</div>
+                        <h3>Excel ke JSON/CSV</h3>
+                        <p>Ekstrak baris data spreadsheet (.xlsx) menjadi web array.</p>
+                    </div>
+                </div>
+
+                <div class="card" onclick="openConverter('csv_xml')">
+                    <div class="bg"></div><div class="blob blob-purple"></div>
+                    <div class="card-content">
+                        <div class="card-icon">📄</div>
+                        <h3>CSV/XML ke JSON</h3>
+                        <p>Ubah format data mentah untuk kebutuhan API.</p>
+                    </div>
+                </div>
+
+                <!-- Media Audio/Video (BARU) -->
+                <div class="card" onclick="openConverter('media')">
+                    <div class="bg"></div><div class="blob blob-red"></div>
+                    <div class="card-content">
+                        <div class="card-icon">🎬</div>
+                        <h3>Video & Audio</h3>
+                        <p>Rip MP4 ke MP3/GIF, atau kompres WAV ke MP3/OGG.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= HALAMAN KONVERTER ================= -->
+        <div id="converterView" class="hidden">
+            
+            <button class="btn-back" onclick="goHome()">
+                <span class="text-container">
+                    <span class="text">← Back</span>
+                </span>
+            </button>
+            <h2 id="converterTitle">Konverter</h2>
+
+            <!-- Box Catatan Media (BARU) -->
+            <div id="mediaDisclaimer" class="alert-box hidden">
+                <b>⚠️ CATATAN PENTING:</b><br>
+                Fitur konversi Video & Audio ini menggunakan mesin <i>FFmpeg WebAssembly</i>. Karena memproses video/audio sangat berat dan dilakukan 100% secara lokal, <b>kecepatan konversi sangat bergantung pada RAM dan prosesor (CPU) perangkat Anda</b>. Browser mungkin akan terasa sedikit 'freeze' selama pemrosesan.
+            </div>
+
+            <div class="settings-panel">
+                <div class="quality-control" id="qualityControl">
+                    <label><span>Kualitas Hasil (Gambar)</span><span id="qualityValue">90%</span></label>
+                    <input type="range" id="qualitySlider" min="10" max="100" step="10" value="90">
+                </div>
+                <div class="format-control hidden" id="formatControl">
+                    <label>Format Output:</label>
+                    <select id="targetFormatSelect"></select>
+                </div>
+            </div>
+
+            <div class="url-upload">
+                <input type="url" id="urlInput" placeholder="Atau paste URL file di sini (https://...)">
+                <button id="fetchUrlBtn" class="btn btn-download">Ambil</button>
+                <button id="infoUrlBtn" class="btn-info" title="Info Limitasi URL">ℹ️</button>
+            </div>
+
+            <div class="drop-zone" id="dropZone">
+                <p id="dropZoneTitle">📁 Tarik & Lepas file di sini</p>
+                <span id="dropZoneSubtitle">klik untuk memilih file lokal</span>
+                <input type="file" id="fileInput" multiple>
+            </div>
+
+            <div class="action-buttons" id="actionButtons">
+                <button id="downloadAllBtn" class="btn btn-download-all">📦 Unduh Semua (ZIP)</button>
+                <button id="resetBtn" class="btn btn-reset">🗑️ Bersihkan</button>
+            </div>
+
+            <div class="results" id="resultsContainer"></div>
+        </div>
+        
+        <!-- UIVERSE LOADER OVERLAY -->
+        <div id="loaderOverlay" class="loader-overlay hidden">
+            <div class="loader-wrapper">
+                <span class="loader-letter">M</span><span class="loader-letter">e</span><span class="loader-letter">m</span>
+                <span class="loader-letter">p</span><span class="loader-letter">r</span><span class="loader-letter">o</span>
+                <span class="loader-letter">s</span><span class="loader-letter">e</span><span class="loader-letter">s</span>
+                <div class="loader"></div>
+            </div>
+            <p id="loaderStatus" style="margin-top: 20px; font-weight: 600; color: var(--text-main);"></p>
+        </div>
+
+    </div>
+
+    <script src="assets/script.js"></script>
+</body>
+</html>
