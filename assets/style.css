@@ -13,6 +13,9 @@
     --color-blue: #3A86FF;
     --color-purple: #8338EC;
     --color-red: #EF476F;
+    --color-pink: #940036;
+    --color-brown: #a74600;
+    --color-green: #00ffbb;
 }
 
 /* =========================================
@@ -65,21 +68,21 @@ body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg-color); c
 .header-title p { margin: 0; color: var(--text-muted); font-size: 1.1rem;}
 /* Box Disclaimer */
 .disclaimer-box {
-    background-color: var(--color-tosca-light); /* Background warna tosca muda */
-    border: 2px solid var(--color-tosca-dark);  /* Border warna tosca gelap */
+    background-color: var(--color-tosca-light); 
+    border: 2px solid var(--color-tosca-dark);  
     border-radius: 14px;
     padding: 18px 24px;
-    margin: 0 auto 35px auto; /* Margin bawah 35px agar tidak menempel ke kartu */
-    max-width: 650px; /* Lebar dibatasi agar tetap elegan */
+    margin: 0 auto 35px auto; 
+    max-width: 650px; 
     display: flex;
     align-items: center;
     gap: 20px;
-    box-shadow: 0 4px 15px rgba(46, 196, 182, 0.15); /* Bayangan halus */
+    box-shadow: 0 4px 15px rgba(46, 196, 182, 0.15); 
 }
 
 .disclaimer-icon {
     font-size: 32px;
-    flex-shrink: 0; /* Agar ikon tidak gepeng di mobile */
+    flex-shrink: 0; 
 }
 
 .disclaimer-text strong {
@@ -107,6 +110,9 @@ body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg-color); c
 .blob-blue { background-color: var(--color-blue); }
 .blob-purple { background-color: var(--color-purple); }
 .blob-red { background-color: var(--color-red); }
+.blob-pink { background-color: var(--color-pink); }
+.blob-yellow { background-color: var(--color-brown); }
+.blob-green { background-color: var(--color-green); }
 @keyframes blob-bounce { 0%, 100% { transform: translate(-100%, -100%) translate3d(0, 0, 0); } 25% { transform: translate(-100%, -100%) translate3d(100%, 0, 0); } 50% { transform: translate(-100%, -100%) translate3d(100%, 100%, 0); } 75% { transform: translate(-100%, -100%) translate3d(0, 100%, 0); } }
 .card-content { position: relative; z-index: 3; text-align: center; padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; }
 .card-icon { font-size: 45px; margin-bottom: 15px; }
@@ -173,6 +179,12 @@ body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg-color); c
     animation: move-up-alternate 0.3s forwards;
 }
 
+.pdf-icon {
+    width: 70px; height: 70px; display: flex; align-items: center;
+    justify-content: center; background: #FFEBEE; border-radius: 8px;
+    margin-right: 20px; font-size: 32px; border: 1px solid #FFCDD2;
+}
+
 /* Background animasi */
 .btn-back:after,
 .btn-back:before {
@@ -206,7 +218,6 @@ body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg-color); c
     --progress: -102%;
 }
 
-/* Pastikan teks tetap terlihat */
 .btn-back:hover {
     color: var(--color-tosca-dark);
     /* border-color: var(--color-tosca-dark); */
@@ -313,11 +324,37 @@ select:focus { border-color: var(--color-tosca-dark); }
 }
 
 .results { display: grid; grid-template-columns: 1fr; gap: 15px; }
-.result-item { display: flex; align-items: center; padding: 15px; border: 1px solid var(--border-color); border-radius: 12px; background: #fff; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
+.result-item { display: flex; align-items: center; flex-shrink: 0; padding: 15px; border: 1px solid var(--border-color); border-radius: 12px; background: #fff; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
 .result-item img { width: 70px; height: 70px; object-fit: contain; margin-right: 20px; background: var(--bg-color); border-radius: 8px; }
-.file-info { flex-grow: 1; overflow: hidden; }
-.file-info h4 { margin: 0 0 6px 0; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-main);}
+.file-info { 
+    flex-grow: 1; 
+    overflow: hidden; 
+    min-width: 0; 
+    margin-right: 15px;
+}
+.file-info h4 { 
+    margin: 0 0 6px 0; 
+    font-size: 15px; 
+    white-space: nowrap; 
+    overflow: hidden; 
+    text-overflow: ellipsis;
+    color: var(--text-main);
+}
 .file-info p { margin: 0; font-size: 13px; color: var(--text-muted); }
+
+/* Animasi Error pada Input Form */
+.input-error {
+    border-color: var(--color-red) !important;
+    background-color: #FFF0F2;
+    animation: shake 0.4s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    50% { transform: translateX(6px); }
+    75% { transform: translateX(-6px); }
+}
 
 /* ================= UIVERSE LOADER OVERLAY ================= */
 .loader-overlay {
@@ -338,7 +375,7 @@ select:focus { border-color: var(--color-tosca-dark); }
     animation: loader-rotate 2s linear infinite; z-index: 0;
 }
 
-/* Modifikasi Warna Box-Shadow mengikuti Palette: Tosca & Orange */
+
 @keyframes loader-rotate {
     0%, 100% {
         transform: rotate(90deg);
@@ -379,9 +416,20 @@ select:focus { border-color: var(--color-tosca-dark); }
     .settings-panel { flex-direction: column; gap: 15px; }
     .url-upload { flex-direction: column; }
     .action-buttons { flex-direction: column; }
-    .result-item { flex-direction: column; align-items: flex-start; }
-    .result-item img { margin-bottom: 15px; width: 100%; height: 120px; object-fit: cover;}
-    .result-item .btn { width: 100%; margin-top: 15px; }
+    .result-item { 
+        flex-direction: column; 
+        align-items: flex-start; 
+    }
+    .result-item img,
+    .result-item .doc-icon,
+    .result-item .media-icon,
+    .result-item .pdf-icon { 
+        margin-bottom: 12px; margin-right: 0; width: 100%; height: 120px; object-fit: cover;
+    }
+    .result-item .btn { 
+        width: 100%; 
+        margin-top: 12px; 
+    }
     .url-upload { flex-wrap: wrap; }
     .url-upload input { width: 100%; flex: none; }
     #fetchUrlBtn { flex: 1; }
@@ -393,4 +441,14 @@ select:focus { border-color: var(--color-tosca-dark); }
         margin-bottom: 25px;
     }
     .disclaimer-icon { margin-bottom: 10px; }
+    .file-info { 
+        width: 100%; 
+        margin-right: 0; 
+    }
+    .file-info h4 {
+        width: 100%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
 }

@@ -24,10 +24,85 @@ const downloadAllBtn = document.getElementById('downloadAllBtn');
 const resetBtn = document.getElementById('resetBtn');
 const loaderOverlay = document.getElementById('loaderOverlay');
 const loaderStatus = document.getElementById('loaderStatus');
+const pdfPagesWarning = document.getElementById('pdfPagesWarning');
+
+// DOM PDF TOOLS
+const pdfToolsControl = document.getElementById('pdfToolsControl');
+const pdfActionSelect = document.getElementById('pdfActionSelect');
+const pdfPagesContainer = document.getElementById('pdfPagesContainer');
+const pdfPagesInput = document.getElementById('pdfPagesInput');
+// COMPRESS PDF
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+const compressControl = document.getElementById('compressControl');
+const compressLevelSelect = document.getElementById('compressLevelSelect');
+const compressCustomInput = document.getElementById('compressCustomInput');
 
 let currentMode = ''; 
 let convertedFiles = []; 
 let isProcessing = false;
+
+// Event untuk menampilkan/menyembunyikan input nomor halaman
+pdfActionSelect.addEventListener('change', (e) => {
+    const action = e.target.value;
+    if (action === 'extract' || action === 'remove') {
+        pdfPagesContainer.classList.remove('hidden');
+    } else {
+        pdfPagesContainer.classList.add('hidden');
+    }
+});
+// Hilangkan error saat user mulai mengetik sesuatu
+pdfPagesInput.addEventListener('input', () => {
+    pdfPagesInput.classList.remove('input-error');
+    pdfPagesWarning.classList.add('hidden');
+});
+
+// Fungsi Validasi Khusus PDF
+function validatePdfInput() {
+    if (currentMode === 'pdf_tools') {
+        const action = pdfActionSelect.value;
+        // Hanya cek jika action adalah ekstrak atau hapus
+        if (action === 'extract' || action === 'remove') {
+            const inputVal = pdfPagesInput.value.trim();
+            if (!inputVal) {
+                // Munculkan efek merah & bergetar
+                pdfPagesInput.classList.add('input-error');
+                pdfPagesWarning.classList.remove('hidden');
+                
+                // Hapus class setelah animasi getar selesai agar bisa diulang
+                setTimeout(() => pdfPagesInput.classList.remove('input-error'), 400);
+                
+                // Tampilkan SweetAlert
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Tunggu Dulu!',
+                    text: 'Anda harus memasukkan nomor halaman yang ingin diproses.',
+                    confirmButtonColor: '#FFB703'
+                });
+                return false; // Validasi Gagal
+            }
+        }
+    }
+    if (currentMode === 'pdf_compress' && compressLevelSelect.value === 'custom') {
+        const val = parseInt(compressCustomInput.value);
+        if (isNaN(val) || val < 1 || val > 100) {
+            compressCustomInput.classList.add('input-error');
+            setTimeout(() => compressCustomInput.classList.remove('input-error'), 400);
+            Swal.fire({ icon: 'warning', title: 'Persentase Salah!', text: 'Masukkan angka persentase antara 1 hingga 100.', confirmButtonColor: '#06D6A0' });
+            return false;
+        }
+    }
+    return true; // Validasi Lolos
+}
+
+// Tampilkan/Sembunyikan Input Persentase
+compressLevelSelect.addEventListener('change', (e) => {
+    if (e.target.value === 'custom') {
+        compressCustomInput.classList.remove('hidden');
+    } else {
+        compressCustomInput.classList.add('hidden');
+        compressCustomInput.classList.remove('input-error');
+    }
+});
 
 // ================= 1. ROUTING & UI MANAGEMENT =================
 function openConverter(mode) {
@@ -87,6 +162,36 @@ function openConverter(mode) {
             <option value="ogg">Audio OGG (.ogg)</option>
             <option value="gif">Animasi GIF (.gif)</option>
         `;
+    }
+    else if (mode === 'to_pdf') {
+        converterTitle.innerText = "Gambar / Word ke PDF";
+        dropZoneSubtitle.innerText = "Mendukung JPG, PNG, WebP, dan .docx";
+        fileInput.accept = "image/png, image/jpeg, image/webp, .docx";
+        qualityControl.classList.add('hidden'); // Sembunyikan slider kualitas gambar
+        formatControl.classList.remove('hidden');
+        mediaDisclaimer.classList.add('hidden');
+        targetFormatSelect.innerHTML = `<option value="pdf">Dokumen PDF (.pdf)</option>`;
+    }
+    else if (mode === 'pdf_tools') {
+        converterTitle.innerText = "Alat PDF";
+        dropZoneSubtitle.innerText = "Hanya mendukung file dokumen .PDF";
+        fileInput.accept = ".pdf";
+        qualityControl.classList.add('hidden');
+        formatControl.classList.add('hidden');
+        mediaDisclaimer.classList.add('hidden');
+        
+        pdfToolsControl.classList.remove('hidden'); // Tampilkan menu PDF Tools
+    }
+    else if (mode === 'pdf_compress') {
+        converterTitle.innerText = "Kompres PDF";
+        dropZoneSubtitle.innerText = "Hanya mendukung file dokumen .PDF";
+        fileInput.accept = ".pdf";
+        qualityControl.classList.add('hidden');
+        formatControl.classList.add('hidden');
+        pdfToolsControl.classList.add('hidden');
+        mediaDisclaimer.classList.add('hidden');
+        
+        compressControl.classList.remove('hidden'); // Tampilkan UI Kompresi
     }
 }
 
@@ -185,8 +290,12 @@ fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
 
 async function handleFiles(files) {
     if (files.length === 0) return;
+    if (!validatePdfInput()) {
+        fileInput.value = ''; 
+        return;
+    }
     isProcessing = true;
-    toggleLoader(true, "Mempersiapkan...");
+    toggleLoader(true, "Memproses...");
 
     const targetFormat = (currentMode === 'webp') ? 'image/webp' : targetFormatSelect.value;
     const isDataMode = ['excel', 'csv_xml'].includes(currentMode);
@@ -213,20 +322,33 @@ async function handleFiles(files) {
         let hasError = false;
         toggleLoader(true, "Memproses file...");
 
-        for (let i = 0; i < files.length; i++) {
+        // JIKA MODE = PDF TOOLS DAN ACTION = MERGE (Proses Semua File Sekaligus)
+        if (currentMode === 'pdf_tools' && pdfActionSelect.value === 'merge') {
             try {
-                if (isMediaMode) {
-                    await processMediaFile(files[i], targetFormat);
-                } else if (isDataMode) {
-                    await processDataFile(files[i], targetFormat);
-                } else {
-                    const quality = parseInt(qualitySlider.value) / 100;
-                    const targetExt = targetFormat === 'image/webp' ? '.webp' : (targetFormat === 'image/jpeg' ? '.jpg' : '.png');
-                    await processImageFile(files[i], quality, targetFormat, targetExt);
+                await processPdfMerge(files);
+            } catch (error) { hasError = true; }
+        } 
+        // PROSES LOOP STANDAR UNTUK MODE LAINNYA
+        else {
+            for (let i = 0; i < files.length; i++) {
+                try {
+                    if (currentMode === 'pdf_tools') {
+                        await processPdfToolsSingle(files[i], pdfActionSelect.value);
+                    } else if (currentMode === 'pdf_compress') {
+                        await processPdfCompress(files[i]); // PANGGIL ENGINE KOMPRES
+                    } else if (isMediaMode) {
+                        await processDataFile(files[i], targetFormat);
+                    } else if (currentMode === 'to_pdf') {
+                        await processPdfFile(files[i]); 
+                    } else {
+                        const quality = parseInt(qualitySlider.value) / 100;
+                        const targetExt = targetFormat === 'image/webp' ? '.webp' : (targetFormat === 'image/jpeg' ? '.jpg' : '.png');
+                        await processImageFile(files[i], quality, targetFormat, targetExt);
+                    }
+                } catch (error) {
+                    console.error("Gagal:", files[i].name, error);
+                    hasError = true;
                 }
-            } catch (error) {
-                console.error("Gagal:", files[i].name, error);
-                hasError = true;
             }
         }
 
@@ -401,6 +523,289 @@ function processMediaFile(file, targetFormat) {
     });
 }
 
+// ================= 7. ENGINE PDF (GAMBAR & WORD) =================
+function processPdfFile(file) {
+    return new Promise(async (resolve, reject) => {
+        const baseName = file.name.replace(/\.[^/.]+$/, "");
+        const newFileName = baseName + ".pdf";
+        const ext = file.name.split('.').pop().toLowerCase();
+
+        // 1. JIKA FILE ADALAH GAMBAR (JPG/PNG/WEBP) MENGGUNAKAN PDF-LIB
+        if (['jpg', 'jpeg', 'png', 'webp'].includes(ext)) {
+            try {
+                const { PDFDocument } = PDFLib;
+                const pdfDoc = await PDFDocument.create();
+                
+                let imgBytes;
+                let imageToEmbed;
+
+                // pdf-lib tidak mendukung WEBP secara native.
+                // Jika file adalah WEBP, ubah dulu ke format PNG secara background menggunakan Canvas.
+                if (ext === 'webp') {
+                    imgBytes = await new Promise((res, rej) => {
+                        const url = URL.createObjectURL(file);
+                        const img = new Image();
+                        img.onload = () => {
+                            const cvs = document.createElement('canvas');
+                            cvs.width = img.width; cvs.height = img.height;
+                            const ctx = cvs.getContext('2d');
+                            ctx.drawImage(img, 0, 0);
+                            cvs.toBlob(async (blob) => {
+                                URL.revokeObjectURL(url);
+                                res(await blob.arrayBuffer());
+                            }, 'image/png');
+                        };
+                        img.onerror = () => rej("Gagal membaca WEBP");
+                        img.src = url;
+                    });
+                    imageToEmbed = await pdfDoc.embedPng(imgBytes);
+                } 
+                // Jika file JPG / PNG murni, proses langsung byte-nya (Sangat Cepat)
+                else {
+                    imgBytes = await file.arrayBuffer();
+                    if (ext === 'png') {
+                        imageToEmbed = await pdfDoc.embedPng(imgBytes);
+                    } else {
+                        imageToEmbed = await pdfDoc.embedJpg(imgBytes);
+                    }
+                }
+
+                // Ambil dimensi asli gambar
+                const { width, height } = imageToEmbed;
+                
+                // Buat halaman PDF dengan ukuran yang SAMA PERSIS dengan ukuran gambar
+                const page = pdfDoc.addPage([width, height]);
+                
+                // Tempelkan gambar agar memenuhi seluruh halaman tanpa margin putih
+                page.drawImage(imageToEmbed, {
+                    x: 0,
+                    y: 0,
+                    width: width,
+                    height: height,
+                });
+
+                // Render PDF dan ubah menjadi Blob untuk diunduh
+                const pdfBytes = await pdfDoc.save();
+                const pdfBlob = new Blob([pdfBytes], { type: 'application/pdf' });
+                
+                saveAndRender(pdfBlob, newFileName, 'pdf');
+                resolve();
+
+            } catch (err) {
+                console.error(err);
+                reject("Gagal memproses gambar ke PDF menggunakan pdf-lib.");
+            }
+        } 
+        
+        // 2. JIKA FILE ADALAH WORD (.DOCX)
+        else if (ext === 'docx') {
+            try {
+                // A. Parse file Word menjadi kode HTML menggunakan Mammoth
+                const arrayBuffer = await file.arrayBuffer();
+                const result = await mammoth.convertToHtml({ arrayBuffer: arrayBuffer });
+                
+                // B. Buat container virtual di memori untuk dirender
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = result.value;
+                tempDiv.style.padding = '40px'; // Margin kertas virtual
+                tempDiv.style.fontFamily = 'Helvetica, Arial, sans-serif';
+                tempDiv.style.fontSize = '14px';
+                tempDiv.style.lineHeight = '1.6';
+                tempDiv.style.color = '#111';
+                
+                // C. Konversi elemen HTML virtual tersebut menjadi PDF menggunakan html2pdf
+                const opt = {
+                    margin:       10, // Margin PDF output
+                    filename:     newFileName,
+                    image:        { type: 'jpeg', quality: 0.98 },
+                    html2canvas:  { scale: 2, useCORS: true }, // Skala 2 agar teks vektor tajam
+                    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                };
+                
+                const pdfBlob = await html2pdf().set(opt).from(tempDiv).outputPdf('blob');
+                saveAndRender(pdfBlob, newFileName, 'pdf');
+                resolve();
+            } catch (err) {
+                reject("Gagal mem-parsing file Word. Pastikan formatnya valid.");
+            }
+        } else {
+            reject("Format file tidak didukung.");
+        }
+    });
+}
+
+// ================= 8. ENGINE PDF TOOLS =================
+
+// Helper: Ubah input string "1, 3, 5" menjadi array indeks [0, 2, 4]
+function parsePageNumbers(inputString, totalPages) {
+    if (!inputString) throw new Error("Nomor halaman kosong!");
+    const pages = inputString.split(',')
+        .map(p => parseInt(p.trim()) - 1) // Kurangi 1 karena indeks mulai dari 0
+        .filter(p => !isNaN(p) && p >= 0 && p < totalPages); // Hapus jika di luar jangkauan
+    
+    if (pages.length === 0) throw new Error("Nomor halaman tidak valid atau tidak ditemukan.");
+    return pages; // Contoh hasil: [0, 2, 4]
+}
+
+// Alat A: MERGE (Gabungkan Banyak PDF)
+async function processPdfMerge(filesList) {
+    const { PDFDocument } = PDFLib;
+    const mergedPdf = await PDFDocument.create();
+    
+    for (let i = 0; i < filesList.length; i++) {
+        const file = filesList[i];
+        if (!file.name.toLowerCase().endsWith('.pdf')) continue;
+
+        const bytes = await file.arrayBuffer();
+        const pdf = await PDFDocument.load(bytes);
+        
+        // Salin semua halaman dari PDF ini
+        const copiedPages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
+        copiedPages.forEach((page) => mergedPdf.addPage(page));
+    }
+    
+    const resultBytes = await mergedPdf.save();
+    const blob = new Blob([resultBytes], { type: 'application/pdf' });
+    saveAndRender(blob, "PDF_Gabungan_Result.pdf", "pdf");
+}
+
+// Alat B: SPLIT, EXTRACT, & REMOVE (Satu PDF diproses)
+async function processPdfToolsSingle(file, action) {
+    if (!file.name.toLowerCase().endsWith('.pdf')) throw new Error("Bukan PDF");
+    
+    const { PDFDocument } = PDFLib;
+    const bytes = await file.arrayBuffer();
+    const pdf = await PDFDocument.load(bytes);
+    const totalPages = pdf.getPageCount();
+    const baseName = file.name.replace(/\.[^/.]+$/, "");
+
+    // 1. SPLIT (Pisah setiap halaman jadi PDF sendiri)
+    if (action === 'split') {
+        for (let i = 0; i < totalPages; i++) {
+            const newPdf = await PDFDocument.create();
+            const [copiedPage] = await newPdf.copyPages(pdf, [i]);
+            newPdf.addPage(copiedPage);
+            
+            const resultBytes = await newPdf.save();
+            const blob = new Blob([resultBytes], { type: 'application/pdf' });
+            saveAndRender(blob, `${baseName}_Page_${i + 1}.pdf`, "pdf");
+        }
+    } 
+    
+    // 2. EXTRACT (Ambil halaman tertentu jadi 1 PDF baru)
+    else if (action === 'extract') {
+        const pagesToExtract = parsePageNumbers(pdfPagesInput.value, totalPages);
+        const newPdf = await PDFDocument.create();
+        
+        const copiedPages = await newPdf.copyPages(pdf, pagesToExtract);
+        copiedPages.forEach((page) => newPdf.addPage(page));
+        
+        const resultBytes = await newPdf.save();
+        const blob = new Blob([resultBytes], { type: 'application/pdf' });
+        saveAndRender(blob, `${baseName}_Extracted.pdf`, "pdf");
+    } 
+    
+    // 3. REMOVE (Hapus halaman tertentu dari PDF)
+    else if (action === 'remove') {
+        const pagesToRemove = parsePageNumbers(pdfPagesInput.value, totalPages);
+        
+        // SANGAT PENTING: Urutkan halaman yang dihapus dari belakang ke depan (Descending). 
+        // Jika dihapus dari depan, indeks/nomor urut halaman sisanya akan bergeser dan jadi error!
+        pagesToRemove.sort((a, b) => b - a);
+        
+        pagesToRemove.forEach(pageIndex => {
+            pdf.removePage(pageIndex);
+        });
+        
+        const resultBytes = await pdf.save();
+        const blob = new Blob([resultBytes], { type: 'application/pdf' });
+        saveAndRender(blob, `${baseName}_Removed.pdf`, "pdf");
+    }
+}
+
+/// ================= 8. ENGINE KOMPRESI PDF (HD FLATTENING + WEBP) =================
+async function processPdfCompress(file) {
+    if (!file.name.toLowerCase().endsWith('.pdf')) throw new Error("Bukan PDF");
+
+    const baseName = file.name.replace(/\.[^/.]+$/, "");
+    const level = compressLevelSelect.value;
+    
+    // Default (Sedang)
+    let quality = 0.7; 
+    
+    // RAHASIA TEKS TAJAM: Naikkan skala render!
+    // Scale 3.0 setara dengan ~216 DPI (Sangat tajam untuk dibaca)
+    let scale = 3.0; 
+
+    // Logika Level Kompresi
+    if (level === 'low') {
+        quality = 0.9; scale = 4.0; // Resolusi sangat tinggi, ukuran file lebih besar
+    } else if (level === 'max') {
+        quality = 0.4; scale = 2.0; // Resolusi diturunkan demi ukuran terkecil
+    } else if (level === 'custom') {
+        const percent = parseInt(compressCustomInput.value);
+        quality = percent / 100;
+        scale = 3.0; 
+    }
+
+    // 1. Baca PDF menggunakan PDF.js
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    const totalPages = pdf.numPages;
+
+    // 2. Siapkan kanvas kosong baru dari pdf-lib
+    const { PDFDocument } = PDFLib;
+    const newPdf = await PDFDocument.create();
+
+    // 3. Render HD & Kompres per Halaman
+    for (let i = 1; i <= totalPages; i++) {
+        const page = await pdf.getPage(i);
+        const viewport = page.getViewport({ scale: scale });
+        
+        // Render ke Canvas memori
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+        
+        // Beri background putih agar transparan tidak jadi hitam
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+        
+        // UBAH KE WEBP (Kualitas lebih tajam dari JPG pada size yang sama)
+        const imgBytes = await new Promise((resolve) => {
+            canvas.toBlob(async (blob) => {
+                resolve(await blob.arrayBuffer());
+            }, 'image/webp', quality);
+        });
+        
+        // Karena pdf-lib belum native support wepb, kita ubah kembali format byte-nya ke PNG 
+        // secara virtual untuk di-embed (ukurannya akan mengikuti kompresi webp sebelumnya)
+        // Note: Penggunaan JPG lebih direkomendasikan pdf-lib untuk flattening
+        const imgDataUrl = canvas.toDataURL('image/jpeg', quality);
+        const jpgBytes = await fetch(imgDataUrl).then(res => res.arrayBuffer());
+        
+        const embeddedImage = await newPdf.embedJpg(jpgBytes);
+        
+        // Kembalikan ke ukuran kertas asli (dibagi scale)
+        const originalWidth = viewport.width / scale;
+        const originalHeight = viewport.height / scale;
+        
+        const newPage = newPdf.addPage([originalWidth, originalHeight]);
+        newPage.drawImage(embeddedImage, {
+            x: 0, y: 0, 
+            width: originalWidth, 
+            height: originalHeight
+        });
+    }
+
+    const pdfBytes = await newPdf.save();
+    const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+    saveAndRender(blob, `${baseName}_Compressed.pdf`, "pdf");
+}
+
 // ================= UI RENDER =================
 function saveAndRender(blob, fileName, type) {
     const sizeKB = (blob.size / 1024).toFixed(1);
@@ -410,7 +815,8 @@ function saveAndRender(blob, fileName, type) {
     let previewHtml = "";
     if (type === 'image') previewHtml = `<img src="${url}" alt="preview">`;
     else if (type === 'data') previewHtml = `<div class="doc-icon">📄</div>`;
-    else if (type === 'media') previewHtml = `<div class="media-icon">🎧</div>`; // Ikon Audio/Video
+    else if (type === 'media') previewHtml = `<div class="media-icon">🎬</div>`;
+    else if (type === 'pdf') previewHtml = `<div class="pdf-icon">📑</div>`; // <--- BARIS BARU INI // Ikon Audio/Video
 
     const div = document.createElement('div');
     div.className = 'result-item';

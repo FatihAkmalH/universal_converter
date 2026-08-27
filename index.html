@@ -15,6 +15,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- PDF TOOLS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.21/mammoth.browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     
     <link rel="stylesheet" href="assets/style.css">
 </head>
@@ -98,6 +103,31 @@
                         <p>Rip MP4 ke MP3/GIF, atau kompres WAV ke MP3/OGG.</p>
                     </div>
                 </div>
+                <!-- TO PDF CONVERTER -->
+                <div class="card" onclick="openConverter('to_pdf')">
+                    <div class="bg"></div><div class="blob blob-pink"></div>
+                    <div class="card-content">
+                        <div class="card-icon">📑</div>
+                        <h3>Gambar/Word ke PDF</h3>
+                        <p>Jadikan file JPG, PNG, WebP, atau Word (.docx) menjadi dokumen PDF.</p>
+                    </div>
+                </div>
+                <div class="card" onclick="openConverter('pdf_tools')">
+                    <div class="bg"></div><div class="blob blob-yellow"></div>
+                    <div class="card-content">
+                        <div class="card-icon">🛠️</div>
+                        <h3>PDF Tools</h3>
+                        <p>Gabungkan, pecah, ekstrak, atau hapus halaman dari file PDF.</p>
+                    </div>
+                </div>
+                <!-- <div class="card" onclick="window.location.href='compressor.html'">
+                    <div class="bg"></div><div class="blob blob-green"></div>
+                    <div class="card-content">
+                        <div class="card-icon">🗜️</div>
+                        <h3>Kompres PDF (PRO)</h3>
+                        <p>Kompresi PDF sejati menggunakan mesin Ghostscript tanpa merusak teks.</p>
+                    </div>
+                </div> -->
             </div>
         </div>
 
@@ -126,6 +156,43 @@
                     <label>Format Output:</label>
                     <select id="targetFormatSelect"></select>
                 </div>
+                <!-- PDF TOOLS CONTROL -->
+                <div class="pdf-tools-control hidden" id="pdfToolsControl" style="width: 100%;">
+                    <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                        <div style="flex: 1; min-width: 200px;">
+                            <label style="font-weight: 600; display: block; margin-bottom: 8px;">Pilih Alat PDF:</label>
+                            <select id="pdfActionSelect" style="width: 100%; padding: 10px; border-radius: 8px; border: 2px solid var(--color-tosca-light); outline: none;">
+                                <option value="merge">Gabungkan PDF (Merge)</option>
+                                <option value="split">Pecah Semua Halaman (Split)</option>
+                                <option value="extract">Ekstrak Halaman Tertentu</option>
+                                <option value="remove">Hapus Halaman Tertentu</option>
+                            </select>
+                        </div>
+                        <div id="pdfPagesContainer" class="hidden" style="flex: 1; min-width: 200px;">
+                            <label style="font-weight: 600; display: block; margin-bottom: 8px;">
+                                Nomor Halaman <span style="color: var(--color-red);">*</span>
+                            </label>
+                            <input type="text" id="pdfPagesInput" placeholder="Contoh: 1, 3, 5" style="width: 100%; padding: 10px; border-radius: 8px; border: 2px solid var(--border-color); outline: none; transition: 0.3s;">
+                            <!-- Pesan Error (Sembunyi by default) -->
+                            <span id="pdfPagesWarning" class="hidden" style="color: var(--color-red); font-size: 12px; margin-top: 6px; display: block; font-weight: 600;">
+                                ⚠️ Kolom ini wajib diisi!
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                    <div class="compress-control hidden" id="compressControl" style="width: 100%;">
+                        <label style="font-weight: 600; display: block; margin-bottom: 8px;">Level Kompresi PDF:</label>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                            <select id="compressLevelSelect" style="flex: 1; min-width: 200px; padding: 10px; border-radius: 8px; border: 2px solid var(--color-tosca-light); outline: none;">
+                                <option value="low">Rendah (Kualitas Terjaga)</option>
+                                <option value="medium" selected>Sedang (Rekomendasi)</option>
+                                <option value="max">Maksimum (Ukuran Terkecil)</option>
+                                <option value="custom">Kustom Persentase...</option>
+                            </select>
+                            <!-- Box Input ini akan disembunyikan kecuali user memilih "Kustom" -->
+                            <input type="number" id="compressCustomInput" class="hidden" placeholder="Misal: 50" min="1" max="100" style="width: 130px; padding: 10px; border-radius: 8px; border: 2px solid var(--border-color); outline: none; transition: 0.3s;">
+                        </div>
+                    </div>
             </div>
 
             <div class="url-upload">
