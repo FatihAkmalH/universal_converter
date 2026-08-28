@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ghostscript PDF Compressor</title>
+    <link rel="shortcut icon" href="assets/favicon.webp" type="image/x-icon">
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- Panggil CSS yang sama -->
+    <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+    <div class="container">
+        <!-- Tombol Kembali ke Halaman Utama -->
+        <button class="btn-back" onclick="window.location.href='index.html'">
+            <span class="text-container">
+                <span class="text">← Main Menu</span>
+            </span>
+        </button>
+        
+        <h2 id="converterTitle" style="text-align: center; color: var(--color-tosca-dark);">Kompresor PDF</h2>
+
+        <!-- Peringatan Sistem -->
+        <div class="alert-box" style="background: #E8F5E9; color: #1B5E20; border-color: #4CAF50;">
+            <b>🚀 Mode Ghostscript WASM Aktif</b><br>
+            Anda berada di halaman khusus. Mesin kompresi tingkat lanjut ini akan membedah PDF Anda untuk mengecilkan gambar di dalamnya 
+            <b>tanpa</b> merusak ketajaman teks (vektor). Proses ini mungkin memakan waktu lebih lama.
+            <b>"TERGANTUNG SPESIFIKASI KOMPUTER MASING-MASING PENGGUNA"</b><br>
+            <a 
+                href="https://github.com/FatihAkmalH/universal_converter.git"
+                target="_blank"
+                rel="noopener noreferrer"
+                style="
+                    display: inline-block;
+                    margin-top: 10px;
+                    padding: 7px 12px;
+                    background: #FFFFFF;
+                    color: #1B5E20;
+                    border: 1px solid #4CAF50;
+                    border-radius: 8px;
+                    font-size: 13px;
+                    font-weight: 600;
+                    text-decoration: none;
+                    transition: all 0.3s ease;
+                "
+            >
+                🔗 Link Github Ghostscript WebAssembly
+            </a>
+        </div>
+
+        <div class="settings-panel">
+            <div class="compress-control" style="width: 100%;">
+                <label style="font-weight: 600; display: block; margin-bottom: 8px;">Pilih Tingkat Kompresi:</label>
+                <select id="gsQualitySelect" style="width: 100%; padding: 12px; border-radius: 8px; border: 2px solid var(--color-green); outline: none; font-size: 15px;">
+                    <option value="/screen">Maksimum (Rekomendasi untuk Web / Email - 72 dpi)</option>
+                    <option value="/ebook">Sedang (Cocok untuk dibaca di layar - 150 dpi)</option>
+                    <option value="/printer">Rendah (Kualitas Cetak Tinggi - 300 dpi)</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Area Drag & Drop -->
+        <div class="drop-zone" id="dropZone" style="border-color: var(--color-green);">
+            <p id="dropZoneTitle" style="color: var(--color-green);">📁 Tarik & Lepas PDF di sini</p>
+            <span id="dropZoneSubtitle">hanya mendukung .pdf</span>
+            <input type="file" id="fileInput" accept=".pdf">
+        </div>
+
+        <div class="results" id="resultsContainer"></div>
+
+        <!-- ================= OPEN SOURCE / GITHUB ================= -->
+        <div class="opensource-section">
+            <a
+                href="https://github.com/FatihAkmalH/universal_converter.git"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="github-button"
+                title="Lihat Repository GitHub"
+            >
+                <div class="github-content">
+                    <img
+                        src="assets/GitHub_wordmark_light.svg"
+                        alt="GitHub"
+                        class="github-icon"
+                    >
+
+                    <div class="github-text">
+                        <strong>Open Source Project</strong>
+                        <span>Lihat source code di GitHub</span>
+                    </div>
+
+                    <span class="github-arrow">↗</span>
+                </div>
+            </a>
+        </div>
+
+        <!-- UIVERSE LOADER OVERLAY (Menggunakan desain loader Anda) -->
+        <div id="loaderOverlay" class="loader-overlay hidden">
+            <div class="loader-wrapper">
+                <span class="loader-letter">M</span><span class="loader-letter">e</span><span class="loader-letter">m</span>
+                <span class="loader-letter">p</span><span class="loader-letter">r</span><span class="loader-letter">o</span>
+                <span class="loader-letter">s</span><span class="loader-letter">e</span><span class="loader-letter">s</span>
+                <div class="loader"></div>
+            </div>
+            <p id="loaderStatus" style="margin-top: 20px; font-weight: 600;"></p>
+        </div>
+    </div>
+
+    <script src="assets/compressor.js"></script>
+</body>
+</html>

@@ -451,4 +451,271 @@ select:focus { border-color: var(--color-tosca-dark); }
         overflow: hidden;
         text-overflow: ellipsis;
     }
+
+   .opensource-section {
+        margin-top: 30px;
+        margin-bottom: 5px;
+    }
+
+    .github-button {
+        width: 100%;
+        max-width: 100%;
+        height: 90px;
+        border-radius: 14px;
+    }
+
+    .github-button::before {
+        width: 180%;
+        height: 550%;
+    }
+
+    .github-button::after {
+        inset: 4px;
+        border-radius: 10px;
+    }
+
+    .github-content {
+        padding: 14px 16px;
+        gap: 12px;
+    }
+
+    .github-icon {
+        width: 40px;
+        height: 40px;
+    }
+
+    .github-text strong {
+        font-size: 14px;
+    }
+
+    .github-text span {
+        font-size: 11px;
+    }
+
+    .github-arrow {
+        width: 28px;
+        height: 28px;
+        font-size: 18px;
+    }
+}
+
+/* =========================================
+   OPEN SOURCE / GITHUB CARD
+   ========================================= */
+
+.opensource-section {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin: 40px 0 5px;
+}
+
+/* =========================================
+   GITHUB ROTATING BORDER
+   ========================================= */
+
+.github-button {
+    position: relative;
+    width: 100%;
+    max-width: 500px;
+    height: 105px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    overflow: hidden;
+    border-radius: 16px;
+
+    text-decoration: none;
+    color: var(--text-main);
+
+    cursor: pointer;
+
+    box-shadow:
+        15px 15px 40px rgba(0, 0, 0, 0.05),
+        -15px -15px 40px #ffffff;
+
+    transition:
+        transform 0.3s ease,
+        box-shadow 0.3s ease;
+}
+
+
+/* =========================================
+   ROTATING LIGHT
+   ========================================= */
+
+.github-button::before {
+    content: "";
+
+    position: absolute;
+
+    width: 180%;
+    height: 500%;
+
+    background: conic-gradient(
+        from 0deg,
+        transparent 0deg,
+        transparent 40deg,
+
+        var(--color-tosca-dark) 70deg,
+        var(--color-orange-dark) 100deg,
+        var(--color-blue) 130deg,
+
+        transparent 160deg,
+        transparent 360deg
+    );
+
+    animation: github-rotate-border 4s linear infinite;
+
+    z-index: 1;
+}
+
+
+/* =========================================
+   CARD INNER AREA
+   ========================================= */
+
+.github-button::after {
+    content: "";
+
+    position: absolute;
+
+    inset: 4px;
+
+    background: var(--color-white);
+
+    border-radius: 12px;
+
+    z-index: 2;
+}
+
+
+/* =========================================
+   CONTENT
+   ========================================= */
+
+.github-content {
+    position: relative;
+
+    z-index: 3;
+
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    align-items: center;
+
+    padding: 18px 25px;
+
+    gap: 15px;
+}
+
+
+/* GitHub Icon */
+.github-icon {
+    width: 48px;
+    height: 48px;
+
+    object-fit: contain;
+
+    flex-shrink: 0;
+
+    transition: transform 0.3s ease;
+}
+
+.github-button:hover .github-icon {
+    transform: scale(1.08) rotate(-5deg);
+}
+
+
+/* Text */
+.github-text {
+    display: flex;
+    flex-direction: column;
+
+    justify-content: center;
+
+    gap: 4px;
+
+    flex: 1;
+
+    min-width: 0;
+}
+
+.github-text strong {
+    font-size: 16px;
+    font-weight: 700;
+
+    color: var(--text-main);
+
+    white-space: nowrap;
+}
+
+.github-text span {
+    font-size: 13px;
+
+    color: var(--text-muted);
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+
+/* Arrow */
+.github-arrow {
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    width: 35px;
+    height: 35px;
+
+    flex-shrink: 0;
+
+    font-size: 22px;
+
+    color: var(--color-tosca-dark);
+
+    transition:
+        transform 0.3s ease,
+        color 0.3s ease;
+}
+
+.github-button:hover .github-arrow {
+    transform: translate(4px, -4px) scale(1.1);
+
+    color: var(--color-orange-dark);
+}
+
+
+/* =========================================
+   ROTATION ANIMATION
+   ========================================= */
+
+@keyframes github-rotate-border {
+
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+
+/* =========================================
+   HOVER
+   ========================================= */
+
+.github-button:hover {
+    transform: translateY(-8px);
+
+    box-shadow:
+        20px 20px 50px rgba(46, 196, 182, 0.15),
+        -20px -20px 50px #ffffff;
 }
