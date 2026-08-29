@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Background Remover</title>
+    <link rel="shortcut icon" href="assets/img/favicon.webp" type="image/x-icon">
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- CSS Utama Anda -->
+    <link rel="stylesheet" href="assets/style.css">
+    
+    <!-- Imgly Background Removal (UMD Build) -->
+<!-- <script src="https://unpkg.com/@imgly/background-removal@1.5.0/dist/imglyRemoveBackground.umd.js"></script> -->
+</head>
+<body>
+
+    <div class="container">
+        <button class="btn-back" onclick="window.location.href='index.html'">
+            <span class="text-container">
+                <span class="text">← Main Menu</span>
+            </span>
+        </button>
+        
+        <h2 style="text-align: center; color: var(--color-red);">AI Background Remover</h2>
+
+        <!-- Info Box -->
+        <div style="background: #FFEBEE; color: #C62828; border: 1px solid #FFCDD2; padding: 12px 15px; border-radius: 8px; font-size: 13px; margin-bottom: 20px; line-height: 1.6;">
+            <b>🤖 Mode AI Aktif (ONNX WASM)</b><br>
+            Proses pemotongan gambar dilakukan 100% di perangkat Anda. <b>Catatan:</b> 
+            Pada penggunaan pertama kali, browser akan mengunduh model AI (±40MB) secara otomatis. Harap bersabar jika proses pertama terasa lama.
+            Pengingat Lagi <b>"TERGANTUNG SPESIFIKASI PERANGKAT MASING-MASING PENGGUNA"</b><br><br>
+            <b>Note:</b> Pastikan upload gambar dengan background bersih agar hasilnya juga bersih
+        </div>
+
+        <!-- Area Drag & Drop -->
+        <div class="drop-zone" id="dropZone" style="border-color: var(--color-red);">
+            <p id="dropZoneTitle" style="color: var(--color-red);">📁 Tarik & Lepas Foto di sini</p>
+            <span id="dropZoneSubtitle">Mendukung file JPG, PNG, WebP</span>
+            <input type="file" id="fileInput" accept="image/jpeg, image/png, image/webp">
+        </div>
+
+        <div class="results" id="resultsContainer"></div>
+
+        <!-- UIVERSE LOADER OVERLAY -->
+        <div id="loaderOverlay" class="loader-overlay hidden">
+            <div class="loader-wrapper">
+                <span class="loader-letter">M</span><span class="loader-letter">e</span><span class="loader-letter">m</span>
+                <span class="loader-letter">p</span><span class="loader-letter">r</span><span class="loader-letter">o</span>
+                <span class="loader-letter">s</span><span class="loader-letter">e</span><span class="loader-letter">s</span>
+                <div class="loader"></div>
+            </div>
+            <p id="loaderStatus" style="margin-top: 20px; font-weight: 600; text-align: center;"></p>
+            <p id="loaderProgress" style="margin-top: 5px; font-size: 13px; color: #FFB703;"></p>
+        </div>
+    </div>
+
+    <!-- Script Khusus -->
+    <script type="module" src="assets/bg-remover.js"></script>
+</body>
+</html>
