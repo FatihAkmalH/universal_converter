@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="shortcut icon" href="assets/favicon.webp" type="image/x-icon">
+    <link rel="shortcut icon" href="assets/img/favicon.webp" type="image/x-icon">
     <title>Free Universal Converter</title>
     <!-- Library Media -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -20,6 +20,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.21/mammoth.browser.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <!-- IMG COMPRESSOR -->
+    <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
     
     <link rel="stylesheet" href="assets/style.css">
 </head>
@@ -74,9 +76,17 @@
                         <p>Ubah format vektor menjadi gambar raster biasa.</p>
                     </div>
                 </div>
+                <div class="card" onclick="openConverter('image_compress')">
+                    <div class="bg"></div><div class="blob blob-navy"></div>
+                    <div class="card-content">
+                        <div class="card-icon">📉</div>
+                        <h3>Kompres Gambar</h3>
+                        <p>Kecilkan ukuran file JPG, PNG, dan WebP secara massal dengan kualitas yang dapat diatur.</p>
+                    </div>
+                </div>
 
                 <!-- Data -->
-                <div class="card" onclick="openConverter('excel')">
+                <!-- <div class="card" onclick="openConverter('excel')">
                     <div class="bg"></div><div class="blob blob-blue"></div>
                     <div class="card-content">
                         <div class="card-icon">📊</div>
@@ -85,7 +95,7 @@
                     </div>
                 </div>
 
-                <!-- <div class="card" onclick="openConverter('csv_xml')">
+                <div class="card" onclick="openConverter('csv_xml')">
                     <div class="bg"></div><div class="blob blob-purple"></div>
                     <div class="card-content">
                         <div class="card-icon">📄</div>
@@ -93,6 +103,14 @@
                         <p>Ubah format data mentah untuk kebutuhan API.</p>
                     </div>
                 </div> -->
+                <div class="card" onclick="openConverter('data')">
+                    <div class="bg"></div><div class="blob blob-blue"></div>
+                    <div class="card-content">
+                        <div class="card-icon">📊</div>
+                        <h3>Konverter Data</h3>
+                        <p>Ubah format data antara Excel (.xlsx), CSV, dan XML ke JSON atau sebaliknya.</p>
+                    </div>
+                </div>
 
                 <!-- Media Audio/Video (BARU) -->
                 <div class="card" onclick="openConverter('media')">
@@ -149,7 +167,7 @@
                     <!-- Content -->
                     <div class="github-content">
                         <img
-                            src="assets/GitHub_wordmark_light.svg"
+                            src="assets/img/GitHub_wordmark_light.svg"
                             alt="GitHub"
                             class="github-icon"
                         >
@@ -179,6 +197,15 @@
             <div id="mediaDisclaimer" class="alert-box hidden">
                 <b>⚠️ CATATAN PENTING:</b><br>
                 Fitur konversi Video & Audio ini menggunakan mesin <i>FFmpeg WebAssembly</i>. Karena memproses video/audio sangat berat dan dilakukan 100% secara lokal, <b>kecepatan konversi sangat bergantung pada RAM dan prosesor (CPU) perangkat Anda</b>. Browser mungkin akan terasa sedikit 'freeze' selama pemrosesan.
+            </div>
+
+            <div class="data-info-box hidden" id="dataInfoBox" style="background: #E3F2FD; color: #0D47A1; border: 1px solid #90CAF9; padding: 12px 15px; border-radius: 8px; font-size: 13px; margin-bottom: 15px; line-height: 1.6; width: 100%;">
+                <b style="font-size: 14px;">ℹ️ Panduan Upload Data:</b><br>
+                <ul style="margin: 5px 0 0 0; padding-left: 20px;">
+                    <li><b>Excel (.xlsx, .xls)</b>: Membaca tabel dari <i>Sheet</i> pertama.</li>
+                    <li><b>CSV (.csv)</b>: Pastikan data Anda dipisahkan menggunakan koma (,).</li>
+                    <li><b>XML (.xml)</b>: Struktur tag (pohon/bersarang) akan otomatis dibongkar menjadi objek rapi.</li>
+                </ul>
             </div>
 
             <div class="settings-panel">
@@ -227,6 +254,21 @@
                             <input type="number" id="compressCustomInput" class="hidden" placeholder="Misal: 50" min="1" max="100" style="width: 130px; padding: 10px; border-radius: 8px; border: 2px solid var(--border-color); outline: none; transition: 0.3s;">
                         </div>
                     </div>
+                <!-- IMG COMPRESS TOOL -->
+                <div class="image-compress-control hidden" id="imgCompressControl" style="width: 100%;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <label style="font-weight: 600;">Kualitas Kompresi:</label>
+                        <span id="imgCompressVal" style="font-weight: bold; color: var(--color-purple); background: #F3E5F5; padding: 4px 10px; border-radius: 20px; font-size: 14px;">80%</span>
+                    </div>
+                    <div style="display: flex; gap: 15px; align-items: center;">
+                        <span style="font-size: 13px; color: #666;">Ukuran Kecil</span>
+                        <input type="range" id="imgCompressSlider" min="10" max="100" value="80" style="flex: 1; accent-color: var(--color-purple);">
+                        <span style="font-size: 13px; color: #666;">Kualitas Tinggi</span>
+                    </div>
+                    <p style="font-size: 12px; color: #777; margin-top: 10px; line-height: 1.5;">
+                        *Geser ke kiri untuk file yang lebih kecil, geser ke kanan untuk menjaga kualitas asli gambar.
+                    </p>
+                </div>
             </div>
 
             <div class="url-upload">

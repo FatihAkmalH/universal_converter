@@ -2,6 +2,7 @@
 const homeView = document.getElementById('homeView');
 const converterView = document.getElementById('converterView');
 const converterTitle = document.getElementById('converterTitle');
+const dataInfoBox = document.getElementById('dataInfoBox');
 
 // DOM Elements Pengaturan
 const dropZone = document.getElementById('dropZone');
@@ -36,6 +37,15 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs
 const compressControl = document.getElementById('compressControl');
 const compressLevelSelect = document.getElementById('compressLevelSelect');
 const compressCustomInput = document.getElementById('compressCustomInput');
+// COMPRESS IMG
+const imgCompressControl = document.getElementById('imgCompressControl');
+const imgCompressSlider = document.getElementById('imgCompressSlider');
+const imgCompressVal = document.getElementById('imgCompressVal');
+
+// Update angka persentase secara real-time saat slider digeser
+imgCompressSlider.addEventListener('input', (e) => {
+    imgCompressVal.innerText = `${e.target.value}%`;
+});
 
 let currentMode = ''; 
 let convertedFiles = []; 
@@ -107,23 +117,34 @@ compressLevelSelect.addEventListener('change', (e) => {
 // ================= 1. ROUTING & UI MANAGEMENT =================
 function openConverter(mode) {
     currentMode = mode;
+    
     homeView.classList.add('hidden');
     converterView.classList.remove('hidden');
     resetUI();
     
-    qualityControl.classList.remove('hidden');
-    formatControl.classList.add('hidden');
-    mediaDisclaimer.classList.add('hidden'); // Sembunyikan disclaimer secara default
+    // 2. RESET SEMUA PANEL PENGATURAN (Sembunyikan semuanya secara default)
+    qualityControl.classList.add('hidden');     
+    formatControl.classList.add('hidden');     
+    mediaDisclaimer.classList.add('hidden');    
+    pdfToolsControl.classList.add('hidden');   
+    compressControl.classList.add('hidden');    
+    imgCompressControl.classList.add('hidden');  
+    dataInfoBox.classList.add('hidden');
 
+    // 3. ATUR UI BERDASARKAN MODE YANG DIPILIH
     if (mode === 'webp') {
         converterTitle.innerText = "JPG/PNG ke WebP";
         dropZoneSubtitle.innerText = "Mendukung JPG, PNG";
         fileInput.accept = "image/png, image/jpeg";
+        
+        qualityControl.classList.remove('hidden'); 
     } 
     else if (mode === 'heic') {
         converterTitle.innerText = "HEIC ke JPG/PNG";
         dropZoneSubtitle.innerText = "Mendukung file Apple HEIC/HEIF";
         fileInput.accept = ".heic, .heif";
+        
+        qualityControl.classList.remove('hidden');
         formatControl.classList.remove('hidden');
         targetFormatSelect.innerHTML = `<option value="image/jpeg">JPG (.jpg)</option><option value="image/png">PNG (.png)</option>`;
     } 
@@ -131,32 +152,30 @@ function openConverter(mode) {
         converterTitle.innerText = "SVG ke JPG/PNG";
         dropZoneSubtitle.innerText = "Mendukung format vektor .SVG";
         fileInput.accept = ".svg";
+        
+        qualityControl.classList.remove('hidden');
         formatControl.classList.remove('hidden');
         targetFormatSelect.innerHTML = `<option value="image/jpeg">JPG (.jpg)</option><option value="image/png">PNG (.png)</option>`;
     }
-    else if (mode === 'excel') {
-        converterTitle.innerText = "Excel ke JSON / CSV";
-        dropZoneSubtitle.innerText = "Mendukung .xlsx, .xls";
-        fileInput.accept = ".xlsx, .xls";
-        qualityControl.classList.add('hidden');
+    else if (mode === 'data') {
+        converterTitle.innerText = "Konverter Data";
+        dropZoneSubtitle.innerText = "Mendukung Excel (.xlsx, .xls), CSV, dan XML";
+        fileInput.accept = ".xlsx, .xls, .csv, .xml";
+        
         formatControl.classList.remove('hidden');
-        targetFormatSelect.innerHTML = `<option value="json">JSON (.json)</option><option value="csv">CSV (.csv)</option>`;
-    }
-    else if (mode === 'csv_xml') {
-        converterTitle.innerText = "CSV / XML ke JSON";
-        dropZoneSubtitle.innerText = "Mendukung .csv, .xml";
-        fileInput.accept = ".csv, .xml";
-        qualityControl.classList.add('hidden');
-        formatControl.classList.remove('hidden');
-        targetFormatSelect.innerHTML = `<option value="json">JSON (.json)</option>`;
+        dataInfoBox.classList.remove('hidden');
+        targetFormatSelect.innerHTML = `
+            <option value="json">JSON (.json)</option>
+            <option value="csv">CSV (.csv)</option>
+        `;
     }
     else if (mode === 'media') {
         converterTitle.innerText = "Konverter Audio & Video";
         dropZoneSubtitle.innerText = "Mendukung .mp4, .wav";
         fileInput.accept = "video/mp4, audio/wav";
-        qualityControl.classList.add('hidden');
+        
         formatControl.classList.remove('hidden');
-        mediaDisclaimer.classList.remove('hidden'); // Tampilkan Catatan FFmpeg
+        mediaDisclaimer.classList.remove('hidden');
         targetFormatSelect.innerHTML = `
             <option value="mp3">Audio MP3 (.mp3)</option>
             <option value="ogg">Audio OGG (.ogg)</option>
@@ -167,31 +186,30 @@ function openConverter(mode) {
         converterTitle.innerText = "Gambar / Word ke PDF";
         dropZoneSubtitle.innerText = "Mendukung JPG, PNG, WebP, dan .docx";
         fileInput.accept = "image/png, image/jpeg, image/webp, .docx";
-        qualityControl.classList.add('hidden'); // Sembunyikan slider kualitas gambar
+        
         formatControl.classList.remove('hidden');
-        mediaDisclaimer.classList.add('hidden');
         targetFormatSelect.innerHTML = `<option value="pdf">Dokumen PDF (.pdf)</option>`;
     }
     else if (mode === 'pdf_tools') {
         converterTitle.innerText = "Alat PDF";
         dropZoneSubtitle.innerText = "Hanya mendukung file dokumen .PDF";
         fileInput.accept = ".pdf";
-        qualityControl.classList.add('hidden');
-        formatControl.classList.add('hidden');
-        mediaDisclaimer.classList.add('hidden');
         
-        pdfToolsControl.classList.remove('hidden'); // Tampilkan menu PDF Tools
+        pdfToolsControl.classList.remove('hidden');
     }
     else if (mode === 'pdf_compress') {
         converterTitle.innerText = "Kompres PDF";
         dropZoneSubtitle.innerText = "Hanya mendukung file dokumen .PDF";
         fileInput.accept = ".pdf";
-        qualityControl.classList.add('hidden');
-        formatControl.classList.add('hidden');
-        pdfToolsControl.classList.add('hidden');
-        mediaDisclaimer.classList.add('hidden');
         
-        compressControl.classList.remove('hidden'); // Tampilkan UI Kompresi
+        compressControl.classList.remove('hidden');
+    }
+    else if (mode === 'image_compress') {
+        converterTitle.innerText = "Kompresor Gambar";
+        dropZoneSubtitle.innerText = "Mendukung JPG, PNG, WebP, BMP";
+        fileInput.accept = "image/png, image/jpeg, image/webp, image/bmp";
+        
+        imgCompressControl.classList.remove('hidden');
     }
 }
 
@@ -335,7 +353,9 @@ async function handleFiles(files) {
                     if (currentMode === 'pdf_tools') {
                         await processPdfToolsSingle(files[i], pdfActionSelect.value);
                     } else if (currentMode === 'pdf_compress') {
-                        await processPdfCompress(files[i]); // PANGGIL ENGINE KOMPRES
+                        await processPdfCompress(files[i]);
+                    } else if (currentMode === 'image_compress') {
+                        await processImageCompress(files[i]);
                     } else if (isMediaMode) {
                         await processDataFile(files[i], targetFormat);
                     } else if (currentMode === 'to_pdf') {
@@ -391,90 +411,130 @@ function processImageFile(file, quality, targetFormat, targetExt) {
     });
 }
 
-// ================= 5. ENGINE DATA (BARU) =================
-function processDataFile(file, targetFormat) {
+// ================= ENGINE KONVERSI DATA (Excel/CSV/XML) =================
+async function processDataFile(file, targetFormat) {
     return new Promise((resolve, reject) => {
-        const baseName = file.name.replace(/\.[^/.]+$/, "");
         const ext = file.name.split('.').pop().toLowerCase();
+        const baseName = file.name.replace(/\.[^/.]+$/, "");
+        const newFileName = `${baseName}.${targetFormat}`;
+        
         const reader = new FileReader();
 
-        // MENGUBAH EXCEL (.XLSX)
-        if (currentMode === 'excel') {
-            reader.onload = (e) => {
-                try {
-                    const data = new Uint8Array(e.target.result);
-                    
-                    // Tambahkan cellDates: true agar SheetJS mengenali sel tersebut sebagai tanggal/waktu
-                    const workbook = XLSX.read(data, { type: 'array', cellDates: true });
-                    const worksheet = workbook.Sheets[workbook.SheetNames[0]]; // Ambil sheet pertama
-                    
-                    let resultStr = "", newExt = "";
-                    if (targetFormat === 'json') {
-                        // TAMBAHKAN { raw: false } DI SINI
-                        // Agar output json mengikuti format teks asli yang terlihat di Excel
-                        const jsonData = XLSX.utils.sheet_to_json(worksheet, { raw: false });
-                        resultStr = JSON.stringify(jsonData, null, 2);
-                        newExt = ".json";
-                    } else if (targetFormat === 'csv') {
-                        resultStr = XLSX.utils.sheet_to_csv(worksheet);
-                        newExt = ".csv";
+        reader.onload = async (e) => {
+            try {
+                let finalContent = "";
+                let mimeType = targetFormat === 'json' ? "application/json" : "text/csv";
+
+                // ---------------------------------------------------------
+                // A. JIKA FILE ADALAH XML (Gunakan Parser Bawaan Browser)
+                // ---------------------------------------------------------
+                if (ext === 'xml') {
+                    const parser = new DOMParser();
+                    const xmlDoc = parser.parseFromString(e.target.result, "text/xml");
+
+                    // Validasi jika struktur XML rusak
+                    if (xmlDoc.getElementsByTagName("parsererror").length > 0) {
+                        throw new Error("Struktur file XML rusak atau tidak valid.");
                     }
-                    
-                    const blob = new Blob([resultStr], { type: "text/plain;charset=utf-8" });
-                    saveAndRender(blob, baseName + newExt, 'data'); resolve();
-                } catch (err) { reject("File Excel rusak."); }
-            };
+
+                    // Fungsi rekursif pengubah XML ke Objek JSON
+                    const xmlToJson = (node) => {
+                        let obj = {};
+                        if (node.nodeType === 1) { 
+                            if (node.attributes.length > 0) {
+                                obj["@attributes"] = {};
+                                for (let j = 0; j < node.attributes.length; j++) {
+                                    const attribute = node.attributes.item(j);
+                                    obj["@attributes"][attribute.nodeName] = attribute.nodeValue;
+                                }
+                            }
+                        } else if (node.nodeType === 3) { 
+                            obj = node.nodeValue.trim();
+                        }
+
+                        if (node.hasChildNodes()) {
+                            for (let i = 0; i < node.childNodes.length; i++) {
+                                const item = node.childNodes.item(i);
+                                const nodeName = item.nodeName;
+                                if (nodeName === '#text') {
+                                    const val = item.nodeValue.trim();
+                                    if (val) obj = val;
+                                } else {
+                                    if (typeof obj[nodeName] === "undefined") {
+                                        obj[nodeName] = xmlToJson(item);
+                                    } else {
+                                        if (typeof obj[nodeName].push === "undefined") {
+                                            const old = obj[nodeName];
+                                            obj[nodeName] = [];
+                                            obj[nodeName].push(old);
+                                        }
+                                        obj[nodeName].push(xmlToJson(item));
+                                    }
+                                }
+                            }
+                        }
+                        return obj;
+                    };
+
+                    const jsonObj = xmlToJson(xmlDoc);
+
+                    if (targetFormat === 'json') {
+                        finalContent = JSON.stringify(jsonObj, null, 2);
+                    } else if (targetFormat === 'csv') {
+                        // XML ke CSV: Ekstrak array pertama yang ditemukan agar bisa dijadikan tabel
+                        let dataArray = [];
+                        const findArray = (obj) => {
+                            for (let key in obj) {
+                                if (Array.isArray(obj[key])) { dataArray = obj[key]; return; } 
+                                else if (typeof obj[key] === 'object') { findArray(obj[key]); }
+                            }
+                        };
+                        findArray(jsonObj);
+                        if (dataArray.length === 0) dataArray = [jsonObj]; // Fallback jika tidak ada array
+
+                        const sheet = XLSX.utils.json_to_sheet(dataArray);
+                        finalContent = XLSX.utils.sheet_to_csv(sheet);
+                    }
+                } 
+                // ---------------------------------------------------------
+                // B. JIKA FILE ADALAH EXCEL (.xlsx / .xls) ATAU CSV
+                // ---------------------------------------------------------
+                else {
+                    // Gunakan pustaka SheetJS (XLSX)
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+
+                    if (targetFormat === 'json') {
+                        const jsonObj = XLSX.utils.sheet_to_json(worksheet);
+                        finalContent = JSON.stringify(jsonObj, null, 2);
+                    } else if (targetFormat === 'csv') {
+                        finalContent = XLSX.utils.sheet_to_csv(worksheet);
+                    }
+                }
+
+                // Buat file siap unduh
+                const blob = new Blob([finalContent], { type: mimeType });
+                saveAndRender(blob, newFileName, 'data');
+                resolve();
+
+            } catch (err) {
+                console.error(err);
+                reject(err.message || "Gagal memproses file data.");
+            }
+        };
+
+        reader.onerror = () => reject("Gagal membaca file.");
+
+        // PERHATIAN: XML harus dibaca sebagai Teks murni, 
+        // sedangkan Excel/CSV harus dibaca sebagai Array Buffer biner
+        if (ext === 'xml') {
+            reader.readAsText(file);
+        } else {
             reader.readAsArrayBuffer(file);
         }
-        
-        // MENGUBAH CSV / XML
-        else if (currentMode === 'csv_xml') {
-            reader.onload = (e) => {
-                try {
-                    const content = e.target.result;
-                    if (ext === 'csv') {
-                        // Pakai PapaParse untuk CSV
-                        Papa.parse(content, {
-                            header: true, skipEmptyLines: true,
-                            complete: (res) => {
-                                const blob = new Blob([JSON.stringify(res.data, null, 2)], { type: "application/json" });
-                                saveAndRender(blob, baseName + ".json", 'data'); resolve();
-                            }
-                        });
-                    } else if (ext === 'xml') {
-                        // XML parsing standar
-                        const xmlDoc = new DOMParser().parseFromString(content, "text/xml");
-                        if(xmlDoc.getElementsByTagName("parsererror").length > 0) throw new Error();
-                        const blob = new Blob([JSON.stringify(xmlToJson(xmlDoc), null, 2)], { type: "application/json" });
-                        saveAndRender(blob, baseName + ".json", 'data'); resolve();
-                    } else { reject(); }
-                } catch (err) { reject("Gagal mem-parsing file."); }
-            };
-            reader.readAsText(file);
-        }
     });
-}
-
-// Fungsi Bantuan Konversi XML -> JSON (Struktur Dasar)
-function xmlToJson(xml) {
-    let obj = {};
-    if (xml.nodeType === 1 && xml.attributes.length > 0) {
-        obj["@attributes"] = {};
-        for (let j = 0; j < xml.attributes.length; j++) obj["@attributes"][xml.attributes.item(j).nodeName] = xml.attributes.item(j).nodeValue;
-    } else if (xml.nodeType === 3) { obj = xml.nodeValue.trim(); }
-    
-    if (xml.hasChildNodes()) {
-        for (let i = 0; i < xml.childNodes.length; i++) {
-            let item = xml.childNodes.item(i), nodeName = item.nodeName;
-            if (nodeName === '#text') { if (item.nodeValue.trim() === '') continue; else obj = item.nodeValue.trim(); }
-            else if (typeof(obj[nodeName]) === "undefined") obj[nodeName] = xmlToJson(item);
-            else {
-                if (typeof(obj[nodeName].push) === "undefined") obj[nodeName] = [obj[nodeName]];
-                obj[nodeName].push(xmlToJson(item));
-            }
-        }
-    }
-    return obj;
 }
 
 // ================= 6. ENGINE MEDIA (FFMPEG.WASM) =================
@@ -804,6 +864,50 @@ async function processPdfCompress(file) {
     const pdfBytes = await newPdf.save();
     const blob = new Blob([pdfBytes], { type: 'application/pdf' });
     saveAndRender(blob, `${baseName}_Compressed.pdf`, "pdf");
+}
+
+// ================= 9. ENGINE KOMPRESOR GAMBAR =================
+async function processImageCompress(file) {
+    return new Promise(async (resolve, reject) => {
+        if (!file.type.startsWith('image/')) {
+            reject(new Error("Bukan file gambar"));
+            return;
+        }
+
+        // Ambil nilai dari slider (contoh: 80% menjadi 0.8)
+        const qualityVal = parseInt(imgCompressSlider.value) / 100;
+        
+        const options = {
+            // Kita ingin memprioritaskan kualitas (persentase) daripada max MB
+            // Angka 50 MB hanya sebagai plafon batas atas agar tidak error
+            maxSizeMB: 50, 
+            
+            // Batas maksimal resolusi gambar (4K). Jika gambar lebih besar dari ini,
+            // otomatis akan diperkecil dimensinya (resize) agar aman di memori.
+            maxWidthOrHeight: 3840, 
+            
+            useWebWorker: true,        // Rahasia agar browser tidak hang!
+            initialQuality: qualityVal, // Menerapkan input persentase user
+            alwaysKeepResolution: true // Jika memungkinkan, jangan ubah panjang x lebar gambar
+        };
+
+        try {
+            // Eksekusi kompresi menggunakan browser-image-compression
+            const compressedFile = await imageCompression(file, options);
+            
+            // Format ulang nama output (contoh: foto.jpg -> foto_compressed.jpg)
+            const baseName = file.name.replace(/\.[^/.]+$/, "");
+            const ext = file.name.split('.').pop().toLowerCase();
+            const newFileName = `${baseName}_compressed.${ext}`;
+            
+            // Render hasilnya ke layar menggunakan fungsi bawaan web Anda
+            saveAndRender(compressedFile, newFileName, 'image');
+            resolve();
+        } catch (error) {
+            console.error("Kompresi gambar gagal:", error);
+            reject(error);
+        }
+    });
 }
 
 // ================= UI RENDER =================

@@ -16,6 +16,7 @@
     --color-pink: #940036;
     --color-brown: #a74600;
     --color-green: #00ffbb;
+    --color-navy: #1d0036;
 }
 
 /* =========================================
@@ -113,6 +114,7 @@ body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg-color); c
 .blob-pink { background-color: var(--color-pink); }
 .blob-yellow { background-color: var(--color-brown); }
 .blob-green { background-color: var(--color-green); }
+.blob-navy { background-color: var(--color-navy); }
 @keyframes blob-bounce { 0%, 100% { transform: translate(-100%, -100%) translate3d(0, 0, 0); } 25% { transform: translate(-100%, -100%) translate3d(100%, 0, 0); } 50% { transform: translate(-100%, -100%) translate3d(100%, 100%, 0); } 75% { transform: translate(-100%, -100%) translate3d(0, 100%, 0); } }
 .card-content { position: relative; z-index: 3; text-align: center; padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; }
 .card-icon { font-size: 45px; margin-bottom: 15px; }
