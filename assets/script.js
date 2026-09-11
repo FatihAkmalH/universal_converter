@@ -11,12 +11,22 @@ const fileInput = document.getElementById('fileInput');
 const urlInput = document.getElementById('urlInput');
 const fetchUrlBtn = document.getElementById('fetchUrlBtn');
 const infoUrlBtn = document.getElementById('infoUrlBtn');
+const urlUploadArea = document.getElementById('urlUploadArea');
 
 const qualityControl = document.getElementById('qualityControl');
 const qualitySlider = document.getElementById('qualitySlider');
 const qualityValue = document.getElementById('qualityValue');
 const formatControl = document.getElementById('formatControl');
 const targetFormatSelect = document.getElementById('targetFormatSelect');
+
+// DOM Encode Base64
+const textInputArea = document.getElementById('textInputArea');
+const plainTextInput = document.getElementById('plainTextInput');
+const base64Output = document.getElementById('base64Output');
+const btnEncodeBase64 = document.getElementById('btnEncodeBase64');
+const btnCopyBase64 = document.getElementById('btnCopyBase64');
+const txtUploadArea = document.getElementById('txtUploadArea');
+const txtFileInput = document.getElementById('txtFileInput');
 
 // DOM Elements Hasil & Loader
 const resultsContainer = document.getElementById('resultsContainer');
@@ -130,6 +140,9 @@ function openConverter(mode) {
     compressControl.classList.add('hidden');    
     imgCompressControl.classList.add('hidden');  
     dataInfoBox.classList.add('hidden');
+    dropZone.classList.remove('hidden');
+    textInputArea.classList.add('hidden');
+    urlUploadArea.classList.remove('hidden');
 
     // 3. ATUR UI BERDASARKAN MODE YANG DIPILIH
     if (mode === 'webp') {
@@ -210,6 +223,16 @@ function openConverter(mode) {
         fileInput.accept = "image/png, image/jpeg, image/webp, image/bmp";
         
         imgCompressControl.classList.remove('hidden');
+    } else if (mode === 'base64') {
+        converterTitle.innerText = "Text ke Base64";
+        dropZoneSubtitle.innerText = ""
+        
+        dropZone.classList.add('hidden'); 
+        textInputArea.classList.remove('hidden');
+        urlUploadArea.classList.add('hidden');
+        
+        plainTextInput.value = '';
+        base64Output.value = '';
     }
 }
 
@@ -975,3 +998,110 @@ downloadAllBtn.addEventListener('click', async () => {
         finally { toggleLoader(false); }
     }, 100);
 });
+
+// ================= ENGINE TEXT KE BASE64 =================
+btnEncodeBase64.addEventListener('click', () => {
+    const text = plainTextInput.value;
+    
+    if (!text.trim()) {
+        Swal.fire('Teks Kosong', 'Harap masukkan teks yang ingin di-encode terlebih dahulu.', 'warning');
+        return;
+    }
+
+    try {
+        const encoded = btoa(unescape(encodeURIComponent(text)));
+        base64Output.value = encoded;
+    } catch (error) {
+        console.error("Base64 Error:", error);
+        Swal.fire('Error', 'Gagal memproses teks menjadi Base64.', 'error');
+    }
+});
+
+// Event Klik Tombol Copy
+btnCopyBase64.addEventListener('click', async () => {
+    const resultText = base64Output.value;
+    
+    if (!resultText) return;
+
+    try {
+        await navigator.clipboard.writeText(resultText);
+        
+        const originalText = btnCopyBase64.innerHTML;
+        btnCopyBase64.innerHTML = '✔️ Copied!';
+        btnCopyBase64.style.background = 'var(--color-green)';
+        
+        setTimeout(() => {
+            btnCopyBase64.innerHTML = originalText;
+            btnCopyBase64.style.background = '#333';
+        }, 2000);
+    } catch (err) {
+        console.error('Gagal copy teks: ', err);
+        Swal.fire('Gagal Copy', 'Browser Anda tidak mengizinkan akses clipboard otomatis.', 'error');
+    }
+});
+
+// ================= EVENT LISTENER UPLOAD FILE .TXT =================
+
+// Efek visual saat file ditarik ke atas kotak
+txtUploadArea.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    txtUploadArea.style.borderColor = 'var(--color-green)';
+    txtUploadArea.style.backgroundColor = '#e8f5e9';
+});
+
+txtUploadArea.addEventListener('dragleave', (e) => {
+    e.preventDefault();
+    txtUploadArea.style.borderColor = '#ccc';
+    txtUploadArea.style.backgroundColor = '#f9f9f9';
+});
+
+// Event saat file dilepas (Drop)
+txtUploadArea.addEventListener('drop', (e) => {
+    e.preventDefault();
+    txtUploadArea.style.borderColor = '#ccc';
+    txtUploadArea.style.backgroundColor = '#f9f9f9';
+    
+    if (e.dataTransfer.files.length > 0) {
+        handleTxtFile(e.dataTransfer.files[0]);
+    }
+});
+
+// Event saat tombol "Pilih File Notepad" diklik
+txtFileInput.addEventListener('change', (e) => {
+    if (e.target.files.length > 0) {
+        handleTxtFile(e.target.files[0]);
+    }
+});
+
+// Fungsi untuk membaca isi file .txt ke dalam textarea
+function handleTxtFile(file) {
+    // Validasi ketat: Hanya izinkan file berakhiran .txt
+    if (!file.name.toLowerCase().endsWith('.txt') && file.type !== 'text/plain') {
+        Swal.fire('Format Salah', 'Hanya menerima file teks (.txt) dari Notepad.', 'warning');
+        return;
+    }
+
+    const reader = new FileReader();
+    
+    // Saat file berhasil dibaca, masukkan isinya ke textarea
+    reader.onload = (e) => {
+        plainTextInput.value = e.target.result;
+        Swal.fire({
+            title: 'Berhasil!',
+            text: 'Teks dari file berhasil dimuat.',
+            icon: 'success',
+            timer: 1500,
+            showConfirmButton: false
+        });
+    };
+
+    reader.onerror = () => {
+        Swal.fire('Error', 'Gagal membaca isi file tersebut.', 'error');
+    };
+
+    // Baca file sebagai teks murni
+    reader.readAsText(file);
+    
+    // Reset input file agar file yang sama bisa di-upload ulang jika diperlukan
+    txtFileInput.value = '';
+}
